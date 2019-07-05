@@ -3,6 +3,7 @@ FROM node:lts-alpine as build-npm
 WORKDIR /app
 COPY ./client .
 RUN npm install
+RUN npm rebuild node-sass
 RUN npm run build
 
 # build server binary
@@ -13,7 +14,7 @@ COPY server ./
 RUN go get github.com/go-sql-driver/mysql
 RUN go get github.com/gorilla/mux
 RUN echo "Go path: $GOPATH"
-RUN env GOOS=linux GOARCH=386 go build -o /avh_bs_main main.go
+RUN env GOOS=linux GOARCH=amd64 go build -o /avh_bs_main main.go
 RUN chmod +x /avh_bs_main
 
 # the actual app stage
@@ -24,7 +25,7 @@ COPY --from=build-go /avh_bs_main /app/avh_bs_main
 EXPOSE 8081
 
 # default env variables
-ENV AVHBS_DB_USER db_user
+ENV AVHBS_DB_USER root
 ENV AVHBS_DB_PASS db_pass
 ENV AVHBS_DB_NAME avhbs_db
 ENV AVHBS_DB_IP db
